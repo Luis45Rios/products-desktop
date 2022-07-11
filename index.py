@@ -13,34 +13,40 @@ class Product:
 
         #Create a Frame contain 
         frame = LabelFrame(self.wind, text = ("Register a new product"))
-        frame.grid(row = 0, column = 3, columnspan = 3, pady = 15)
+        frame.grid(row = 0, column = 3, columnspan = 3, pady =20)
+
+        #Id
+        Label(frame, text = "Codigo del producto: ").grid(row = 1, column = 0)
+        self.codigo = Entry(frame)
+        self.codigo.focus()
+        self.codigo.grid(row = 1, column = 1)
 
         #Name input
-        Label(frame, text = "Nombre: ").grid(row = 1, column = 0)
+        Label(frame, text = "Nombre: ").grid(row = 2, column = 0)
         self.nombre = Entry(frame)
-        self.nombre.focus()
-        self.nombre.grid(row = 1, column = 1)
+        self.nombre.grid(row = 2, column = 1)
         
         #Price input
-        Label(frame, text = "Price: ").grid(row = 2, column = 0)
+        Label(frame, text = "Price: ").grid(row = 3, column = 0)
         self.price = Entry(frame)
-        self.price.grid(row = 2, column = 1)
+        self.price.grid(row = 3, column = 1)
 
         #Cantidad Input
-        Label(frame, text = "Cantidad: ").grid(row = 3, column = 0)
+        Label(frame, text = "Cantidad: ").grid(row = 4, column = 0)
         self.cantidad = Entry(frame)
-        self.cantidad.grid(row = 3, column = 1)
+        self.cantidad.grid(row = 4, column = 1)
 
 
         #Create Add Botton
-        ttk.Button(frame, text = "Save Product", command = self.add_product).grid(row = 4, column = 0, columnspan = 3, sticky = W + E)
+        ttk.Button(frame, text = "Save Product", command = self.add_product).grid(row = 5, column = 0, columnspan = 3, sticky = W + E)
 
         #Table
-        self.tree = ttk.Treeview(window, height= 10, columns = ("Name", "Price", "Cantidad" ))
-        self.tree.grid(row = 10, column = 3, columnspan = 2)
-        self.tree.heading("#0", text = "Name")
-        self.tree.heading("#1", text = "Price")
-        self.tree.heading("#2", text= "Cantidad")
+        self.tree = ttk.Treeview(window, height= 72, columns = ("Codigo","Nombre", "Price"))
+        self.tree.grid(row = 1, column = 3, columnspan = 1)
+        self.tree.heading("#0", text = "Codigo del producto")
+        self.tree.heading("#1", text = "Name")
+        self.tree.heading("#2", text = "Price")
+        self.tree.heading("#3", text= "Cantidad")
 
         self.get_products()
 
@@ -65,12 +71,12 @@ class Product:
             self.tree.insert("", "0", text = row[1], values = row[2], value = row[3])      
 
     def validation(self):
-        return len(self.nombre.get()) != 0 and len(self.price.get()) != 0 and len(self.cantidad.get()) != 0
+        return len(self.nombre.get()) != 0 and len(self.price.get()) != 0 and len(self.cantidad.get()) != 0 and len(self.codigo.get()) != 0
 
     def add_product(self):
         if self.validation():
             query = "INSERT INTO product VALUES(NULL, ?, ?)"
-            parameters = (self.nombre.get(), self.price.get(), self.cantidad)
+            parameters = (self.nombre.get(), self.price.get(), self.cantidad, self.codigo)
             self.run_query(query, parameters)
             print("Datos guardados")
         else:
