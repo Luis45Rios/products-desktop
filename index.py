@@ -15,15 +15,10 @@ class Product:
         frame = LabelFrame(self.wind, text = ("Register a new product"))
         frame.grid(row = 0, column = 3, columnspan = 3, pady =20)
 
-        #Id
-        Label(frame, text = "Codigo del producto: ").grid(row = 1, column = 0)
-        self.codigo = Entry(frame)
-        self.codigo.focus()
-        self.codigo.grid(row = 1, column = 1)
-
         #Name input
         Label(frame, text = "Nombre: ").grid(row = 2, column = 0)
         self.nombre = Entry(frame)
+        self.nombre.focus()
         self.nombre.grid(row = 2, column = 1)
         
         #Price input
@@ -41,48 +36,49 @@ class Product:
         ttk.Button(frame, text = "Save Product", command = self.add_product).grid(row = 5, column = 0, columnspan = 3, sticky = W + E)
 
         #Table
-        self.tree = ttk.Treeview(window, height= 72, columns = ("Codigo","Nombre", "Price"))
+        self.tree = ttk.Treeview(window, height= 72, columns = ("Nombre", "Price"))
         self.tree.grid(row = 1, column = 3, columnspan = 1)
-        self.tree.heading("#0", text = "Codigo del producto")
-        self.tree.heading("#1", text = "Name")
-        self.tree.heading("#2", text = "Price")
-        self.tree.heading("#3", text= "Cantidad")
+        self.tree.heading("#0", text = "Name")
+        self.tree.heading("#1", text = "Price")
+        self.tree.heading("#2", text= "Cantidad")
 
         self.get_products()
 
+    # Function to Execute Database Querys
     def run_query(self, query, parameters = ()):
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
             result = cursor.execute(query, parameters)
             conn.commit()
-        return result
+            return result
 
+    # Get Products from Database
     def get_products(self):
-
-        #Cleaning table
+        # cleaning Table 
         records = self.tree.get_children()
         for element in records:
             self.tree.delete(element)
-        
-        #Query data
-        query ="SELECT * FROM product"
+        # getting data
+        query = 'SELECT * FROM product ORDER BY id DESC'
         db_rows = self.run_query(query)
+        # filling data
         for row in db_rows:
-            self.tree.insert("", "0", text = row[1], values = row[2], value = row[3])      
-
+            self.tree.insert("", "0", text = row[1], values = row[2], value = row[3])
+            
+    # User Input Validation
     def validation(self):
-        return len(self.nombre.get()) != 0 and len(self.price.get()) != 0 and len(self.cantidad.get()) != 0 and len(self.codigo.get()) != 0
+        return len(self.nombre.get()) != 0 and len(self.price.get()) != 0 and len(self.cantidad.get()) != 0 
 
     def add_product(self):
         if self.validation():
-            query = "INSERT INTO product VALUES(NULL, ?, ?)"
-            parameters = (self.nombre.get(), self.price.get(), self.cantidad, self.codigo)
-            self.run_query(query, parameters)
+            query1 = 'INSERT INTO product VALUES(NULL, ?, ?,)'
+            parameters =  (self.nombre.get(), self.price.get(), self.cantidad.get())
+            self.run_query(query1, parameters)
             print("Datos guardados")
         else:
-            print("El nombre, el precio y la cantidad son requeridos")
+            print("Ingrese los datos")
         self.get_products()
-        
+
 
 if __name__=="__main__":
     window = Tk()
