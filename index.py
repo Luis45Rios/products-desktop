@@ -15,6 +15,8 @@ class Product:
         frame = LabelFrame(self.wind, text = ("Register a new product"))
         frame.grid(row = 0, column = 3, columnspan = 3, pady =20)
 
+
+
         #Name input
         Label(frame, text = "Nombre: ").grid(row = 2, column = 0)
         self.nombre = Entry(frame)
@@ -35,13 +37,22 @@ class Product:
         #Create Add Botton
         ttk.Button(frame, text = "Save Product", command = self.add_product).grid(row = 5, column = 0, columnspan = 3, sticky = W + E)
 
+        #Output Messages 
+        self.message = Label(text = "", fg = "red")
+        self.message.grid(row = 5, column = 3, columnspan = 2, sticky = W + E)
+
         #Table
-        self.tree = ttk.Treeview(window, height= 72, columns = ("Nombre", "Price"))
-        self.tree.grid(row = 1, column = 3, columnspan = 1)
+        self.tree = ttk.Treeview(window, height= 10, columns = ("Nombre", "Price"))
+        self.tree.grid(row = 7, column = 3, columnspan = 1)
         self.tree.heading("#0", text = "Name")
         self.tree.heading("#1", text = "Price")
         self.tree.heading("#2", text= "Cantidad")
 
+        #Buttons
+        ttk.Button(frame, text = "Eliminar", command = self.delete_product()).grid(row = 6, column = 0, sticky = W + E)
+        ttk.Button(frame, text = "Editar").grid(row = 6, column = 1, sticky = E + W)
+
+  # Filling the Rows
         self.get_products()
 
     # Function to Execute Database Querys
@@ -50,7 +61,8 @@ class Product:
             cursor = conn.cursor()
             result = cursor.execute(query, parameters)
             conn.commit()
-            return result
+        return result
+        
 
     # Get Products from Database
     def get_products(self):
@@ -63,7 +75,7 @@ class Product:
         db_rows = self.run_query(query)
         # filling data
         for row in db_rows:
-            self.tree.insert("", "0", text = row[1], values = row[2], value = row[3])
+            self.tree.insert('', 'end',values=(row[2], row[3],))
             
     # User Input Validation
     def validation(self):
@@ -71,13 +83,30 @@ class Product:
 
     def add_product(self):
         if self.validation():
-            query1 = 'INSERT INTO product VALUES(NULL, ?, ?,)'
+            query = 'INSERT INTO product VALUES(Null, ?, ?, ?)'
             parameters =  (self.nombre.get(), self.price.get(), self.cantidad.get())
-            self.run_query(query1, parameters)
-            print("Datos guardados")
+            self.run_query(query, parameters)
+            self.message["text"] = "Producto {} guardado exitosamente".format(self.nombre.get())
+            self.nombre.delete(0, END)
+            self.price.delete(0, END)
+            self.cantidad.delete(0, END)
         else:
-            print("Ingrese los datos")
+            self.message["text"] = "Los datos son requeridos"
         self.get_products()
+
+    def delete_product(self):    
+        self.message["text"] = ""
+        try:
+            self.tree.item(self.tree.selection())["text"][0]
+        except IndexError as e:
+            self.message["text"] = "Por favor, seleccione un registro"
+            return
+        self.message["text"] = ""
+        name = self.tree.item(self.tree.selection())["text"]
+        query = "DELETE FROM product WHERE name = ?"
+        self.run_query(query, (name, ))
+        self.message["text"] = "El producto {} se ha eliminado exitosamente".format(name)
+        self.get_products
 
 
 if __name__=="__main__":
